@@ -41,10 +41,15 @@ class Element(object):
                 item.render(file_out, "    ")
         file_out.write('{tag_indent}{end_tag}\n'.format(tag_indent=self.indent, end_tag=self.endtag))
 
+
 class Html(Element):
 
     tag = '<html>'
     endtag = '</html>'
+
+    def render(self, file_out, ind=""):
+        file_out.write('<!DOCTYPE html>\n')
+        Element.render(self, file_out, ind)
 
 
 class P(Element):
@@ -111,12 +116,10 @@ class SelfClosingTag(Element):
 
 
 class Hr(SelfClosingTag):
-
     tag = '<hr />'
 
 
 class Br(SelfClosingTag):
-
     tag = '<br />'
 
 
@@ -127,7 +130,7 @@ class A(Element):
     indent = '        '
 
     def __init__(self, link, content):
-        self.link = link
+        self.link = {'href': link}
         self.content = content
         attrib = {}
         Element.__init__(self, content, **attrib)
@@ -135,7 +138,47 @@ class A(Element):
     def render(self, file_out, ind=""):
         """Write element tags, link, and content to the file_out StringIO object"""
 
-        file_out.write('{tag_indent}{start_tag} {link}>{content}{end_tag}\n'.format
+        l_string = '{m_key}={m_item}'.format(m_key=str(self.link)[2:6], m_item=str(self.link)[9:-1])
+        file_out.write('{tag_indent}{start_tag} {link}>{end_tag}\n'.format
                       (tag_indent=self.indent, start_tag=self.tag[:-1],
-                          link=self.link, content=self.content[0], end_tag=self.endtag))
+                          link=l_string, end_tag=self.endtag))
 
+
+class Ul(Element):
+    tag = '<ul>'
+    endtag = '</ul>'
+    indent = '        '
+
+
+class Li(Element):
+    tag = '<li>'
+    endtag = '</li>'
+    indent = '            '
+
+
+class H(OneLineTag):
+    tag = '<h>'
+    endtag = '</h>'
+    indent = '        '
+
+    def __init__(self, level, content):
+        self.level = level
+        self.tag = '{tag_open}{h_level}{tag_close}'.format(tag_open=self.tag[:-1], h_level=self.level,tag_close='>')
+        self.endtag = '{tag_open}{h_level}{tag_close}'.format(tag_open=self.endtag[:-1], h_level=self.level, tag_close='>')
+        Element.__init__(self, content)
+
+    def render(self, file_out, ind=""):
+        """Write single line elements to the file_out StringIO object"""
+        file_out.write('{tag_indent}{start_tag}{content}{end_tag}\n'.format
+                      (tag_indent=self.indent, start_tag=self.tag,
+                       content=self.content[0], end_tag=self.endtag))
+
+
+class Meta(SelfClosingTag):
+    tag = '<meta />'
+
+    def __init__(self, **meta):
+        self.meta = meta
+        m_string = '{m_key}={m_item}'.format(m_key=str(meta)[1:9], m_item=str(meta)[12:])
+        self.tag = '{tag_open}{m_key}{tag_close}'.format(tag_open=self.tag[:-2], m_key=m_string[1:-1], tag_close=' />')
+        Element.__init__(self, meta)
