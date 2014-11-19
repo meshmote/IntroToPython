@@ -210,7 +210,7 @@ body.append(hr.Hr())
 
 list = hr.Ul(id="TheList", style="line-height:200%")
 
-list.append(hr.Li("The first item in a list") )
+list.append(hr.Li("The first item in a list"))
 list.append(hr.Li("This is the second item", style="color: red") )
 
 item = hr.Li()
