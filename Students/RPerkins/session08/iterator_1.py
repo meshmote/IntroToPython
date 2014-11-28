@@ -22,6 +22,7 @@ class IterateMe(object):
             self.stop = args[0]
             if len(args) == 2:
                 self.step = args[1]
+                self.start = stop-self.step
 
     def __iter__(self):
         self.current = self.start
